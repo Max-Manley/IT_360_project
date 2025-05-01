@@ -4,47 +4,58 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 
-
-
 def visualize_log_metrics(json_filepath="log_metrics.json"):
     # Load the metrics from the JSON file
     with open(json_filepath, 'r') as file:
         data = json.load(file)
 
-
     # Convert to DataFrame for visualization
-    df = pd.DataFrame(list(data.items()), columns=['Total', 'Count'])
+    df = pd.DataFrame(list(data.items()), columns=['Metric', 'Value'])
 
+    # Sort
+    df.sort_values(by='Value', ascending=False, inplace=True)
 
     # Set style
     sns.set(style="whitegrid")
 
-
     # Create subplots: one row, two columns
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 6))
 
-
     # Bar plot
-    sns.barplot(x='Count', y='Total', data=df, palette='viridis', ax=ax1)
+    sns.barplot(x='Value', y='Metric', data=df, palette='viridis', ax=ax1)
     ax1.set_title("Log Metrics Summary - Bar Plot")
     ax1.set_xlabel("Count")
-    ax1.set_ylabel("Total")
-
+    ax1.set_ylabel("Metric")
 
     # Add value labels to bars
-    for index, value in enumerate(df['Count']):
-        ax1.text(value + 0.1, index, str(value), color='black', va="center")
+    for index, value in enumerate(df['Value']):
+        ax1.text(value + 0.1, index, str(value), color='black', va="center", fontsize=9)
 
+    # Filter out zero values
+    df_filtered = df[df['Value'] != 0]
 
-    # Pie chart
-    ax2.pie(df['Count'], labels=df['Total'], autopct='%1.1f%%', startangle=140, colors=sns.color_palette('viridis', len(df)))
-    ax2.set_title("Log Metrics Summary - Pie Chart")
+    # Pie chart 
+    wedges, texts, autotexts = ax2.pie(
+        df_filtered['Value'].values,
+        labels=df_filtered['Metric'].values,
+        autopct=lambda p: f'{p:.1f}%' if p > 0 else '',
+        startangle=90,
+        colors=sns.color_palette('viridis', len(df_filtered)),
+        labeldistance=1.1,    
+        pctdistance=0.9       
+    )
 
+    for text in texts:
+        text.set_fontsize(8)
+    for autotext in autotexts:
+        autotext.set_fontsize(8)
+
+    ax2.set_title("Log Metrics Summary - Pie Chart", fontsize=12)
+
+    ax2.set_title("Log Metrics Summary - Pie Chart", fontsize=12)
 
     plt.tight_layout()
     plt.show()
-
-
 
 
 if __name__ == "__main__":
