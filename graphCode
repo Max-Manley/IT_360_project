@@ -1,0 +1,51 @@
+import json
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+
+
+
+def visualize_log_metrics(json_filepath="log_metrics.json"):
+    # Load the metrics from the JSON file
+    with open(json_filepath, 'r') as file:
+        data = json.load(file)
+
+
+    # Convert to DataFrame for visualization
+    df = pd.DataFrame(list(data.items()), columns=['Total', 'Count'])
+
+
+    # Set style
+    sns.set(style="whitegrid")
+
+
+    # Create subplots: one row, two columns
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 6))
+
+
+    # Bar plot
+    sns.barplot(x='Count', y='Total', data=df, palette='viridis', ax=ax1)
+    ax1.set_title("Log Metrics Summary - Bar Plot")
+    ax1.set_xlabel("Count")
+    ax1.set_ylabel("Total")
+
+
+    # Add value labels to bars
+    for index, value in enumerate(df['Count']):
+        ax1.text(value + 0.1, index, str(value), color='black', va="center")
+
+
+    # Pie chart
+    ax2.pie(df['Count'], labels=df['Total'], autopct='%1.1f%%', startangle=140, colors=sns.color_palette('viridis', len(df)))
+    ax2.set_title("Log Metrics Summary - Pie Chart")
+
+
+    plt.tight_layout()
+    plt.show()
+
+
+
+
+if __name__ == "__main__":
+    visualize_log_metrics()
